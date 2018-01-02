@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -28,13 +29,32 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
-	public User getUser(int id) {
-		return this.users.stream().filter(user -> user.getId() == id).findFirst().orElse(null);
+	public User getUser(@PathVariable("id") Long id) {
+		return this.users.stream().filter(user -> user.getId() == id).findFirst().get();
 	}
 
 	@RequestMapping(method=RequestMethod.POST)
-	public void userSave(@RequestBody User user) {
-		Long 
+	public User userSave(@RequestBody User user) {
+		Long nextId = 0L;
+		if (this.users.size() != 0) {
+			User lastUser = this.users.stream().skip(this.users.size() - 1).findFirst().get();
+			nextId = lastUser.getId() + 1;
+		}
+		
+		user.setId(nextId);
+		users.add(user);
+		return user;		
+	}
+	
+	@RequestMapping(method=RequestMethod.PUT)
+	public User updateUser(@RequestBody User user) {
+		User modifiedUser = this.users.stream().filter(u -> u.getId() == user.getId()).findFirst().get();
+		modifiedUser.setFirstName(user.getFirstName());
+		modifiedUser.setLastName(user.getLastName());
+		modifiedUser.setUsername(user.getUsername());
+		modifiedUser.setPassword(user.getPassword());
+		modifiedUser.setEmail(user.getEmail());
+		return modifiedUser;
 	}
 
 	List<User> createUsers() {
